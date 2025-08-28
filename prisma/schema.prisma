@@ -9,7 +9,7 @@ datasource db {
 }
 
 model rol {
-  idRol       Int       @id
+  idRol       Int       @id @default(autoincrement())
   nombreRol   String?   @db.VarChar(50)
   descripcion String?   @db.VarChar(50)
   usuario     usuario[]
@@ -18,7 +18,7 @@ model rol {
 model usuario {
   idUsuario   Int      @id @default(autoincrement())
   idRol       Int?
-  nombre      String   @db.VarChar(50)
+  nombre      String   @unique @db.VarChar(50)
   contrasenia String?  @db.VarChar(255)
   correo      String?  @db.VarChar(50)
   salario     Decimal? @db.Decimal(10, 0)

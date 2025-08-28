@@ -5,7 +5,8 @@ import {
   obtenerEmpleado,
   modificarEmpleado,
   eliminarEmpleado,
-} from "../controllers/empleados.js";
+} from "../controllers/empleadosControlador.js";
+import { verificarJwt } from "../middlewares/jwtMiddleware.js";
 
 const empleadosRutas = Router();
 
@@ -15,6 +16,6 @@ empleadosRutas
   .get(listarEmpleado)
   .put(modificarEmpleado)
   .delete(eliminarEmpleado);
-empleadosRutas.route("/buscarIndividual").post(obtenerEmpleado);
+empleadosRutas.route("/buscarIndividual").post(verificarJwt, obtenerEmpleado);
 
 export default empleadosRutas;
