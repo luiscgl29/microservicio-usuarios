@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model rol {
+  idRol       Int       @id
+  nombreRol   String?   @db.VarChar(50)
+  descripcion String?   @db.VarChar(50)
+  usuario     usuario[]
+}
+
+model usuario {
+  idUsuario   Int      @id @default(autoincrement())
+  idRol       Int?
+  nombre      String   @db.VarChar(50)
+  contrasenia String?  @db.VarChar(255)
+  correo      String?  @db.VarChar(50)
+  salario     Decimal? @db.Decimal(10, 0)
+  rol         rol?     @relation(fields: [idRol], references: [idRol], onDelete: NoAction, onUpdate: NoAction, map: "usuario_ibfk_1")
+
+  @@index([idRol], map: "idRol")
+}
