@@ -1,10 +1,11 @@
 import express from "express";
 import cors from "cors";
 import empleadosRutas from "./routes/empleados.js";
+import { opcionesCors } from "./config/corsConfig.js";
 
 const app = express();
 
-app.use(cors());
+app.use(cors(opcionesCors));
 app.use(express.json());
 app.use(express.urlencoded());
 
