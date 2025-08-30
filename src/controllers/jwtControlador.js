@@ -19,7 +19,9 @@ export const iniciarSesion = async (req, res) => {
     });
     // ver si la contra es correcta
     if (usuario.contrasenia !== contrasenia) {
-      return res.status(400).json({ mensaje: "No es la contrasenia" });
+      return res
+        .status(400)
+        .json({ mensaje: "No es la contrasenia", exito: false });
     }
     // identificador de usuario (payload)
     const payload = {
@@ -45,6 +47,7 @@ export const iniciarSesion = async (req, res) => {
     res.status(200).json({
       mensaje: "Se logeo!",
       usuario: payload,
+      exito: true,
     });
   } catch (e) {
     console.error(e);
@@ -57,9 +60,22 @@ export const cerrarSesion = async (req, res) => {
     if (!cookies.token) {
       return res.status(204).json({ mensaje: "No tiene token" });
     }
-    const tokenRefresco = cookies.tokenRefresco;
     res.clearCookie("token", { httpOnly: true, maxAge: 720 * 60 * 60 * 1000 });
     res.status(204).json({ mensaje: "Se cerro sesion" });
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const getIdentificacion = async (req, res) => {
+  try {
+    if (!req.payload) {
+      return res
+        .status(403)
+        .json({ mensaje: "No se ha logeado", exito: false });
+    }
+    // regresa el payload del JWT desencriptado
+    res.status(200).json({ payload: req.payload, exito: true });
   } catch (e) {
     console.error(e);
   }
