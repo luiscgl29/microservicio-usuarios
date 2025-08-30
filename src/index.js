@@ -14,7 +14,7 @@ app.use(express.urlencoded());
 
 // endpoints
 app.use("/empleados", empleadosRutas);
-app.use("/jwt", jwtRutas);
+app.use("/login", jwtRutas);
 
 app.listen(3000, () => {
   console.log("API en: http://localhost:3000");
