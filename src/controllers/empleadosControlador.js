@@ -1,19 +1,26 @@
 import { PrismaClient } from "../generated/prisma/index.js";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
 export const crearEmpleado = async (req, res) => {
   try {
-    const { nombre, contrasenia, idRol } = req.body;
+    const { idRol, nombre, user, contrasenia, correo, salario } = req.body;
+    const saltRounds = 10;
+    const hash = await bcrypt.hash(contrasenia, saltRounds);
+
     const usuario = await prisma.usuario.create({
       data: {
+        idRol: Number(idRol),
         nombre: nombre,
-        contrasenia: contrasenia,
-        idRol: idRol,
+        user: user,
+        contrasenia: hash,
+        correo: correo,
+        salario: salario,
       },
     });
     if (!usuario) {
-      return res.status(400).json({ mensaje: "No se creo" });
+      return res.status(400).json({ mensaje: "No se registro el usuario" });
     }
     res.status(201).json({ usuario: usuario });
   } catch (e) {
@@ -23,17 +30,17 @@ export const crearEmpleado = async (req, res) => {
 
 export const obtenerEmpleado = async (req, res) => {
   try {
-    const { id } = req.body;
-    if (!id) {
+    const { empleadoId } = req.params;
+    if (!empleadoId) {
       return res.status(400).json({ mensaje: "Necesita agregar id" });
     }
     const datos = await prisma.usuario.findUnique({
       where: {
-        idUsuario: id,
+        idUsuario: Number(empleadoId),
       },
     });
     res.status(200).json({ datosUsuario: datos });
-  } catch {
+  } catch (e) {
     console.error(e);
   }
 };
@@ -49,13 +56,14 @@ export const listarEmpleado = async (req, res) => {
 
 export const modificarEmpleado = async (req, res) => {
   try {
-    const { id, nombre } = req.body;
-    if (!id || !nombre) {
+    const { empleadoId } = req.params;
+    const { user } = req.body;
+    if (!id || !user) {
       return res.status(400).json({ mensaje: "Se necesita el id" });
     }
     const usuarioEncontrado = await prisma.usuario.findUnique({
       where: {
-        idUsuario: id,
+        idUsuario: Number(empleadoId),
       },
     });
     if (!usuarioEncontrado) {
@@ -63,11 +71,11 @@ export const modificarEmpleado = async (req, res) => {
     }
     const datos = await prisma.usuario.update({
       where: {
-        idUsuario: id,
+        idUsuario: Number(empleadoId),
       },
       data: {
         ...usuarioEncontrado,
-        nombre: nombre,
+        user: user,
       },
     });
     res.status(200).json({ mensaje: "Exitoso" });

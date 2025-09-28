@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import bcrypt from "bcrypt";
 import { PrismaClient } from "../generated/prisma/index.js";
 
 dotenv.config();
@@ -7,26 +8,46 @@ const prisma = new PrismaClient();
 
 export const iniciarSesion = async (req, res) => {
   try {
-    const { nombre, contrasenia } = req.body;
+    const { user, contrasenia } = req.body;
     const usuario = await prisma.usuario.findUnique({
       where: {
-        nombre: nombre,
+        user: user,
       },
       // inner join
       include: {
         rol: true,
       },
     });
-    // ver si la contra es correcta
-    if (usuario.contrasenia !== contrasenia) {
+
+    // verificar si existe usuario
+    if (!usuario) {
       return res
         .status(400)
-        .json({ mensaje: "No es la contrasenia", exito: false });
+        .json({ mensaje: "Usuario no encontrado", exito: false });
     }
+
+    // verificar contraseña con bcrypt
+    const validar = await bcrypt.compare(contrasenia, usuario.contrasenia);
+    if (!validar) {
+      return res
+        .status(400)
+        .json({ mensaje: "Contraseña incorrecta", exito: false });
+    }
+    // if (!validar) {
+    //   if (usuario.contrasenia === contrasenia) {
+    //     const hash = await bcrypt.hash(contrasenia, 10);
+    //     await prisma.usuario.update({
+    //       where: { idUsuario: usuario.idUsuario },
+    //       data: { contrasenia: hash },
+    //     });
+    //     validar = true;
+    //   }
+    // }
+
     // identificador de usuario (payload)
     const payload = {
       usuarioId: usuario.idUsuario,
-      nombre: usuario.nombre,
+      user: usuario.user,
       rol: usuario.rol.nombreRol,
     };
 
@@ -45,7 +66,7 @@ export const iniciarSesion = async (req, res) => {
     });
 
     res.status(200).json({
-      mensaje: "Se logeo!",
+      mensaje: "Se logeo con exito",
       usuario: payload,
       exito: true,
     });

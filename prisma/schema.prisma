@@ -10,19 +10,130 @@ datasource db {
 
 model rol {
   idRol       Int       @id @default(autoincrement())
-  nombreRol   String?   @db.VarChar(50)
-  descripcion String?   @db.VarChar(50)
+  nombreRol   String    @db.VarChar(45)
+  descripcion String    @db.VarChar(45)
   usuario     usuario[]
 }
 
 model usuario {
   idUsuario   Int      @id @default(autoincrement())
-  idRol       Int?
-  nombre      String   @unique @db.VarChar(50)
-  contrasenia String?  @db.VarChar(255)
-  correo      String?  @db.VarChar(50)
-  salario     Decimal? @db.Decimal(10, 0)
-  rol         rol?     @relation(fields: [idRol], references: [idRol], onDelete: NoAction, onUpdate: NoAction, map: "usuario_ibfk_1")
+  idRol       Int
+  nombre      String   @db.VarChar(25)
+  user        String   @unique(map: "usuario_UNIQUE") @db.VarChar(15)
+  contrasenia String   @db.VarChar(100)
+  correo      String   @db.VarChar(45)
+  salario     Decimal? @db.Decimal(10, 2)
+  token       String?  @db.VarChar(200)
+  compra      compra[]
+  rol         rol      @relation(fields: [idRol], references: [idRol], onDelete: NoAction, onUpdate: NoAction, map: "usuario_ibfk_1")
+  venta       venta[]
 
   @@index([idRol], map: "idRol")
+}
+
+model categoria {
+  idCategoria Int        @id @default(autoincrement())
+  categoria   String     @db.VarChar(45)
+  descripcion String     @db.VarChar(45)
+  producto    producto[]
+}
+
+model cliente {
+  codCliente Int     @id @default(autoincrement())
+  nombre     String  @db.VarChar(45)
+  direccion  String? @db.VarChar(80)
+  telefono   String? @db.VarChar(15)
+  saldo      Decimal @db.Decimal(10, 2)
+  nitCliente String? @db.VarChar(45)
+  venta      venta[]
+}
+
+model compra {
+  idCompra     Int          @id @default(autoincrement())
+  codProveedor Int
+  idUsuario    Int
+  fecha        DateTime     @db.Date
+  direccion    String?      @db.VarChar(80)
+  totalCompra  Decimal      @db.Decimal(10, 2)
+  proveedor    proveedor    @relation(fields: [codProveedor], references: [codProveedor], onDelete: NoAction, onUpdate: NoAction, map: "compra_ibfk_1")
+  usuario      usuario      @relation(fields: [idUsuario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "compra_ibfk_2")
+  mercaderia   mercaderia[]
+
+  @@index([codProveedor], map: "codProveedor")
+  @@index([idUsuario], map: "idUsuario")
+}
+
+model detalleventa {
+  idDetalleVenta Int      @id @default(autoincrement())
+  idVenta        Int
+  idProducto     Int
+  cantidad       Int
+  precioUnitario Decimal  @db.Decimal(10, 2)
+  descuento      Decimal  @db.Decimal(10, 2)
+  montoTotal     Decimal  @db.Decimal(10, 2)
+  venta          venta    @relation(fields: [idVenta], references: [idVenta], onDelete: NoAction, onUpdate: NoAction, map: "detalleventa_ibfk_1")
+  producto       producto @relation(fields: [idProducto], references: [idProducto], onDelete: NoAction, onUpdate: NoAction, map: "detalleventa_ibfk_2")
+
+  @@index([idProducto], map: "idProducto")
+  @@index([idVenta], map: "idVenta")
+}
+
+model marca {
+  idMarca  Int        @id @default(autoincrement())
+  nombre   String?    @db.VarChar(45)
+  producto producto[]
+}
+
+model mercaderia {
+  idMercaderia Int      @id @default(autoincrement())
+  idCompra     Int
+  idProducto   Int
+  stock        Int
+  precioCompra Decimal  @db.Decimal(10, 2)
+  compra       compra   @relation(fields: [idCompra], references: [idCompra], onDelete: NoAction, onUpdate: NoAction, map: "mercaderia_ibfk_1")
+  producto     producto @relation(fields: [idProducto], references: [idProducto], onDelete: NoAction, onUpdate: NoAction, map: "mercaderia_ibfk_2")
+
+  @@index([idCompra], map: "idCompra")
+  @@index([idProducto], map: "idProducto")
+}
+
+model producto {
+  idProducto   Int            @id @default(autoincrement())
+  idCategoria  Int
+  idMarca      Int
+  nombre       String         @db.VarChar(45)
+  descripcion  String?        @db.VarChar(80)
+  precioVenta  Decimal        @db.Decimal(10, 2)
+  estado       String         @db.VarChar(15)
+  detalleventa detalleventa[]
+  mercaderia   mercaderia[]
+  categoria    categoria      @relation(fields: [idCategoria], references: [idCategoria], onDelete: NoAction, onUpdate: NoAction, map: "producto_ibfk_1")
+  marca        marca          @relation(fields: [idMarca], references: [idMarca], onDelete: NoAction, onUpdate: NoAction, map: "producto_ibfk_2")
+
+  @@index([idCategoria], map: "idCategoria")
+  @@index([idMarca], map: "idMarca")
+}
+
+model proveedor {
+  codProveedor  Int      @id @default(autoincrement())
+  nombreEmpresa String   @db.VarChar(45)
+  direccion     String?  @db.VarChar(80)
+  telefono      String?  @db.VarChar(15)
+  compra        compra[]
+}
+
+model venta {
+  idVenta      Int            @id @default(autoincrement())
+  idUsuario    Int
+  codCliente   Int
+  fecha        DateTime       @db.Date
+  totalVenta   Decimal        @db.Decimal(10, 2)
+  metodoPago   String         @db.VarChar(45)
+  estado       String         @db.VarChar(15)
+  detalleventa detalleventa[]
+  usuario      usuario        @relation(fields: [idUsuario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "venta_ibfk_1")
+  cliente      cliente        @relation(fields: [codCliente], references: [codCliente], onDelete: NoAction, onUpdate: NoAction, map: "venta_ibfk_2")
+
+  @@index([codCliente], map: "codCliente")
+  @@index([idUsuario], map: "idUsuario")
 }

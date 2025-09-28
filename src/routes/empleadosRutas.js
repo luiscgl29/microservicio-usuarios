@@ -13,8 +13,10 @@ empleadosRutas
   .route("/")
   .post(crearEmpleado)
   .get(listarEmpleado)
-  .put(modificarEmpleado)
   .delete(eliminarEmpleado);
-empleadosRutas.route("/buscarIndividual").post(obtenerEmpleado);
+empleadosRutas
+  .route("/individual/:empleadoId")
+  .get(obtenerEmpleado)
+  .put(modificarEmpleado);
 
 export default empleadosRutas;
