@@ -40,8 +40,8 @@ export const obtenerEmpleado = async (req, res) => {
       },
     });
     res.status(200).json({ datosUsuario: datos });
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
   }
 };
 
@@ -96,5 +96,7 @@ export const eliminarEmpleado = async (req, res) => {
       },
     });
     res.status(200).json({ mensaje: "Usuario eliminado" });
-  } catch (e) {}
+  } catch (error) {
+    console.error(error);
+  }
 };
