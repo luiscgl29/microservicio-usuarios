@@ -51,12 +51,12 @@ model cliente {
 
 model compra {
   idCompra      Int             @id @default(autoincrement())
-  codProveedor  Int
+  codProveedor  Int?
   idUsuario     Int
   fecha         DateTime        @db.Date
   direccion     String?         @db.VarChar(80)
   totalCompra   Decimal         @db.Decimal(10, 2)
-  proveedor     proveedor       @relation(fields: [codProveedor], references: [codProveedor], onDelete: NoAction, onUpdate: NoAction, map: "compra_ibfk_1")
+  proveedor     proveedor?      @relation(fields: [codProveedor], references: [codProveedor], onDelete: NoAction, onUpdate: NoAction, map: "compra_ibfk_1")
   usuario       usuario         @relation(fields: [idUsuario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "compra_ibfk_2")
   compradetalle compradetalle[]
 
@@ -71,7 +71,7 @@ model detalleventa {
   idProducto     Int?
   cantidad       Int
   precioUnitario Decimal   @db.Decimal(10, 2)
-  descuento      Decimal   @db.Decimal(10, 2)
+  descuento      Decimal?  @db.Decimal(10, 2)
   montoTotal     Decimal   @db.Decimal(10, 2)
   ivaProducto    Decimal?  @db.Decimal(10, 2)
   venta          venta     @relation(fields: [idVenta], references: [idVenta], onDelete: NoAction, onUpdate: NoAction, map: "detalleventa_ibfk_1")
@@ -91,16 +91,16 @@ model marca {
 
 model producto {
   idProducto         Int            @id @default(autoincrement())
-  idCategoria        Int
-  idMarca            Int
+  idCategoria        Int?
+  idMarca            Int?
   nombre             String         @db.VarChar(45)
   descripcion        String?        @db.VarChar(80)
   precioVenta        Decimal        @db.Decimal(10, 2)
-  cantidadDisponible Int
+  cantidadDisponible Int?           @default(0)
   detalleventa       detalleventa[]
   lote               lote[]
-  categoria          categoria      @relation(fields: [idCategoria], references: [idCategoria], onDelete: NoAction, onUpdate: NoAction, map: "producto_ibfk_1")
-  marca              marca          @relation(fields: [idMarca], references: [idMarca], onDelete: NoAction, onUpdate: NoAction, map: "producto_ibfk_2")
+  categoria          categoria?     @relation(fields: [idCategoria], references: [idCategoria], onDelete: NoAction, onUpdate: NoAction, map: "producto_ibfk_1")
+  marca              marca?         @relation(fields: [idMarca], references: [idMarca], onDelete: NoAction, onUpdate: NoAction, map: "producto_ibfk_2")
 
   @@index([idCategoria], map: "idCategoria")
   @@index([idMarca], map: "idMarca")
@@ -116,26 +116,25 @@ model proveedor {
 model venta {
   idVenta      Int            @id @default(autoincrement())
   idUsuario    Int
-  codCliente   Int
+  codCliente   Int?
   fecha        DateTime       @db.Date
   totalVenta   Decimal        @db.Decimal(10, 2)
-  metodoPago   String         @db.VarChar(45)
   detalleventa detalleventa[]
   usuario      usuario        @relation(fields: [idUsuario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "venta_ibfk_1")
-  cliente      cliente        @relation(fields: [codCliente], references: [codCliente], onDelete: NoAction, onUpdate: NoAction, map: "venta_ibfk_2")
+  cliente      cliente?       @relation(fields: [codCliente], references: [codCliente], onDelete: NoAction, onUpdate: NoAction, map: "venta_ibfk_2")
 
   @@index([codCliente], map: "codCliente")
   @@index([idUsuario], map: "idUsuario")
 }
 
 model compradetalle {
-  idCompraDetalle  Int      @id @default(autoincrement())
-  idCompra         Int?
-  idLote           Int?
-  precioCompra     Decimal? @db.Decimal(10, 2)
-  cantidadComprada Int?
-  compra           compra?  @relation(fields: [idCompra], references: [idCompra], onDelete: NoAction, onUpdate: NoAction, map: "compradetalle_ibfk_1")
-  lote             lote?    @relation(fields: [idLote], references: [idLote], onDelete: NoAction, onUpdate: NoAction, map: "compradetalle_ibfk_2")
+  idCompraDetalle  Int     @id @default(autoincrement())
+  idCompra         Int
+  idLote           Int
+  precioCompra     Decimal @db.Decimal(10, 2)
+  cantidadComprada Int
+  compra           compra  @relation(fields: [idCompra], references: [idCompra], onDelete: NoAction, onUpdate: NoAction, map: "compradetalle_ibfk_1")
+  lote             lote    @relation(fields: [idLote], references: [idLote], onDelete: NoAction, onUpdate: NoAction, map: "compradetalle_ibfk_2")
 
   @@index([idCompra], map: "idCompra")
   @@index([idLote], map: "idLote")
@@ -144,51 +143,13 @@ model compradetalle {
 model lote {
   idLote        Int             @id @default(autoincrement())
   idProducto    Int
-  cantidadTotal Int?
-  precioCompra  Decimal?        @db.Decimal(10, 2)
-  precioVenta   Decimal?        @db.Decimal(10, 2)
+  cantidadTotal Int
+  precioCompra  Decimal         @db.Decimal(10, 2)
+  precioVenta   Decimal         @db.Decimal(10, 2)
+  nombrePaquete String          @db.VarChar(150)
   compradetalle compradetalle[]
   detalleventa  detalleventa[]
   producto      producto        @relation(fields: [idProducto], references: [idProducto], onDelete: NoAction, onUpdate: NoAction, map: "lote_ibfk_1")
 
   @@index([idProducto], map: "lote_ibfk_1")
-}
-
-model ventaregistro {
-  idRegistro    Int                         @id @default(autoincrement())
-  idVenta       Int
-  codCliente    Int
-  idUsuario     Int
-  fechaVenta    DateTime?                   @db.DateTime(0)
-  totalVenta    Decimal?                    @db.Decimal(10, 2)
-  metodoPago    String?                     @db.VarChar(45)
-  tipoOperacion ventaregistro_tipoOperacion
-  fechaCambio   DateTime                    @db.DateTime(0)
-  usuarioBD     String                      @db.VarChar(50)
-}
-
-model compraregistro {
-  idRegistro    Int                          @id @default(autoincrement())
-  idCompra      Int
-  codProveedor  Int
-  idUsuario     Int
-  fechaCompra   DateTime?                    @db.DateTime(0)
-  totalCompra   Decimal?                     @db.Decimal(10, 2)
-  tipoOperacion compraregistro_tipoOperacion
-  fechaCambio   DateTime                     @db.DateTime(0)
-  usuarioBD     String                       @db.VarChar(50)
-}
-
-enum ventaregistro_tipoOperacion {
-  INSERT
-  UPDATE
-  DELETE
-  UPDATE_TOTAL
-}
-
-enum compraregistro_tipoOperacion {
-  INSERT
-  UPDATE
-  DELETE
-  UPDATE_TOTAL
 }

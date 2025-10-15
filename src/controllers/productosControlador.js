@@ -4,22 +4,12 @@ const prisma = new PrismaClient();
 
 export const crearProducto = async (req, res) => {
   try {
-    const {
-      idCategoria,
-      idMarca,
-      nombre,
-      descripcion,
-      precioVenta,
-      cantidadDisponible,
-    } = req.body;
+    const { nombre, descripcion, precioVenta } = req.body;
     const producto = await prisma.producto.create({
       data: {
-        idCategoria: Number(idCategoria),
-        idMarca: Number(idMarca),
         nombre: nombre,
         descripcion: descripcion,
         precioVenta: precioVenta,
-        cantidadDisponible: Number(cantidadDisponible),
       },
     });
     if (!producto) {

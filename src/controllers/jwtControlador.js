@@ -87,17 +87,3 @@ export const cerrarSesion = async (req, res) => {
     console.error(e);
   }
 };
-
-export const getIdentificacion = async (req, res) => {
-  try {
-    if (!req.payload) {
-      return res
-        .status(403)
-        .json({ mensaje: "No se ha logeado", exito: false });
-    }
-    // regresa el payload del JWT desencriptado
-    res.status(200).json({ payload: req.payload, exito: true });
-  } catch (e) {
-    console.error(e);
-  }
-};

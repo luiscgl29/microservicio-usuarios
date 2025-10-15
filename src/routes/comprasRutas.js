@@ -1,8 +1,11 @@
 import { Router } from "express";
-import { crearCompra } from "../controllers/comprasControlador.js";
+import {
+  crearCompra,
+  listarCompras,
+} from "../controllers/comprasControlador.js";
 
 const comprasRutas = Router();
 
-comprasRutas.route("/").post(crearCompra);
+comprasRutas.route("/").post(crearCompra).get(listarCompras);
 
 export default comprasRutas;
