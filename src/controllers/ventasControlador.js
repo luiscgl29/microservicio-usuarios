@@ -74,10 +74,11 @@ export const listarVentas = async (req, res) => {
       include: {
         detalleventa: true,
         usuario: true,
+        cliente: true,
       },
     });
     return res.status(200).json({ mensaje: "Ventas obtenidas", ventas });
   } catch (error) {
-    return res.stauts(500).json({ mensaje: "Ocurrio un error" });
+    return res.status(500).json({ mensaje: "Ocurrió un error" });
   }
 };
