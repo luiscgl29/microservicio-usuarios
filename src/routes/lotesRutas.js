@@ -1,8 +1,19 @@
-import { Router } from "express";
-import { listarLotes } from "../controllers/lotesControlador.js";
+import express from "express";
+import {
+  crearLote,
+  listarLotes,
+  obtenerLote,
+  editarLote,
+} from "../controllers/lotesControlador.js";
 
-const lotesRutas = Router();
+const router = express.Router();
 
-lotesRutas.route("/").get(listarLotes);
+// prettier-ignore
+router
+  .route("/")
+    .post(crearLote)
+    .get(listarLotes)
 
-export default lotesRutas;
+router.route("/:loteId").get(obtenerLote).put(editarLote);
+
+export default router;

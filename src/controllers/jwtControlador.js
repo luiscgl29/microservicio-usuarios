@@ -33,16 +33,6 @@ export const iniciarSesion = async (req, res) => {
         .status(400)
         .json({ mensaje: "Contraseña incorrecta", exito: false });
     }
-    // if (!validar) {
-    //   if (usuario.contrasenia === contrasenia) {
-    //     const hash = await bcrypt.hash(contrasenia, 10);
-    //     await prisma.usuario.update({
-    //       where: { idUsuario: usuario.idUsuario },
-    //       data: { contrasenia: hash },
-    //     });
-    //     validar = true;
-    //   }
-    // }
 
     // identificador de usuario (payload)
     const payload = {

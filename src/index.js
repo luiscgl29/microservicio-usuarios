@@ -12,6 +12,8 @@ import ventasRutas from "./routes/ventasRutas.js";
 import comprasRutas from "./routes/comprasRutas.js";
 import lotesRutas from "./routes/lotesRutas.js";
 import usuarioRouter from "./controllers/usuario.js";
+import rolesRutas from "./routes/rolesRutas.js";
+// import marcarycategoriaRutas from "./routes/marcaycategoriaRutas.js";
 import { verificarPermisos } from "./middlewares/verificarPermisos.js";
 
 const app = express();
@@ -30,8 +32,11 @@ app.use(verificarJwt);
 app.use("/usuario", usuarioRouter);
 
 // verificar permisos
+
 // solo administrador
 app.use("/empleados", verificarPermisos(["Administrador"]), empleadosRutas);
+
+app.use("/roles", verificarPermisos(["Administrador"]), rolesRutas);
 
 // bodeguero
 app.use(
@@ -39,11 +44,13 @@ app.use(
   verificarPermisos(["Administrador", "Bodeguero"]),
   productosRutas
 );
+
 app.use(
   "/lotes",
   verificarPermisos(["Administrador", "Bodeguero"]),
   lotesRutas
 );
+
 app.use(
   "/proveedores",
   verificarPermisos(["Administrador", "Bodeguero"]),

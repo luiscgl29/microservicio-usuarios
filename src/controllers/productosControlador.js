@@ -4,9 +4,11 @@ const prisma = new PrismaClient();
 
 export const crearProducto = async (req, res) => {
   try {
-    const { nombre, descripcion, precioVenta } = req.body;
+    const { idCategoria, idMarca, nombre, descripcion, precioVenta } = req.body;
     const producto = await prisma.producto.create({
       data: {
+        idCategoria: idCategoria || null,
+        idMarca: idMarca || null,
         nombre: nombre,
         descripcion: descripcion,
         precioVenta: precioVenta,
@@ -24,16 +26,17 @@ export const crearProducto = async (req, res) => {
 };
 
 export const obtenerProducto = async (req, res) => {
+  console.log("Parámetros recibidos en la ruta:", req.params);
   try {
-    const { idProducto } = req.params;
-    if (!idProducto) {
+    const { id } = req.params;
+    if (!id) {
       return res
         .status(400)
         .json({ mensaje: "Se necesita el id del producto" });
     }
     const datos = await prisma.producto.findUnique({
       where: {
-        idProducto: Number(idProducto),
+        idProducto: Number(id),
       },
     });
     res.status(200).json({ datosProducto: datos });
@@ -51,38 +54,6 @@ export const listarProducto = async (req, res) => {
   }
 };
 
-export const modificarProducto = async (req, res) => {
-  try {
-    const { productoId } = req.params;
-    const { producto } = req.body;
-    if (!productoId || !producto) {
-      return res
-        .status(400)
-        .json({ mensaje: "Se necesita informacion del producto" });
-    }
-    const productoEncontrado = await prisma.producto.findUnique({
-      where: {
-        idProduct: Number(productoId),
-      },
-    });
-    if (!productoEncontrado) {
-      return res.status(400).json({ mensaje: "El producto no existe" });
-    }
-    const datos = await prisma.producto.update({
-      where: {
-        idProducto: Number(productoId),
-      },
-      data: {
-        ...productoEncontrado,
-        nombre: producto,
-      },
-    });
-    res.status(200).json({ producto: "Producto modificado" });
-  } catch (error) {
-    console.error(error);
-  }
-};
-
 export const eliminarProducto = async (req, res) => {
   try {
     const { id } = req.params;
@@ -97,5 +68,54 @@ export const eliminarProducto = async (req, res) => {
     res.status(200).json({ mensaje: "Producto eliminado" });
   } catch (error) {
     console.error(error);
+  }
+};
+
+export const modificarProducto = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      idCategoria,
+      idMarca,
+      nombre,
+      descripcion,
+      precioVenta,
+      cantidadDisponible,
+    } = req.body;
+
+    if (!id) {
+      return res
+        .status(400)
+        .json({ mensaje: "Se necesita el id del producto" });
+    }
+
+    const productoEncontrado = await prisma.producto.findUnique({
+      where: {
+        idProducto: Number(id),
+      },
+    });
+
+    if (!productoEncontrado) {
+      return res.status(400).json({ mensaje: "El producto no existe" });
+    }
+
+    const datos = await prisma.producto.update({
+      where: {
+        idProducto: Number(id),
+      },
+      data: {
+        idCategoria: idCategoria || null,
+        idMarca: idMarca || null,
+        nombre: nombre,
+        descripcion: descripcion,
+        precioVenta: precioVenta,
+        cantidadDisponible: cantidadDisponible,
+      },
+    });
+
+    res.status(200).json({ producto: datos });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error al modificar el producto" });
   }
 };

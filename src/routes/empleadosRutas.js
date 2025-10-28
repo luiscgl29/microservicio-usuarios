@@ -14,9 +14,6 @@ empleadosRutas
   .post(crearEmpleado)
   .get(listarEmpleado)
   .delete(eliminarEmpleado);
-empleadosRutas
-  .route("/individual/:empleadoId")
-  .get(obtenerEmpleado)
-  .put(modificarEmpleado);
+empleadosRutas.route("/:id").get(obtenerEmpleado).put(modificarEmpleado);
 
 export default empleadosRutas;

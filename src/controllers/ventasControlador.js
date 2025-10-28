@@ -4,25 +4,60 @@ const prisma = new PrismaClient();
 
 export const crearVenta = async (req, res) => {
   try {
-    const { idUsuario, totalVenta, detallesventa } = req.body;
+    const { idUsuario, codCliente, totalVenta, detallesventa } = req.body;
+
     await prisma.$transaction(async (tx) => {
-      // venta
+      // Crear venta con codCliente o null (CF por defecto en frontend)
       const ventaGenerado = await tx.venta.create({
         data: {
           idUsuario,
+          codCliente: codCliente || null, // Si no hay cliente, se guarda null
           fecha: new Date(),
           totalVenta: new Prisma.Decimal(totalVenta),
         },
       });
 
-      // detalles
+      // Crear detalles de venta
       await tx.detalleventa.createMany({
         data: detallesventa.map((detalle) => ({
           ...detalle,
           idVenta: ventaGenerado.idVenta,
+          precioUnitario: new Prisma.Decimal(detalle.precioUnitario),
+          montoTotal: new Prisma.Decimal(detalle.montoTotal),
         })),
       });
-      return res.status(201).json({ mensaje: "Creado" });
+
+      // Actualizar inventario
+      for (const detalle of detallesventa) {
+        if (detalle.idProducto) {
+          // Reducir stock del producto
+          await tx.producto.update({
+            where: { idProducto: detalle.idProducto },
+            data: {
+              cantidadDisponible: {
+                decrement: detalle.cantidad,
+              },
+            },
+          });
+        }
+
+        if (detalle.idLote) {
+          // Reducir cantidad del lote
+          await tx.lote.update({
+            where: { idLote: detalle.idLote },
+            data: {
+              cantidadTotal: {
+                decrement: detalle.cantidad,
+              },
+            },
+          });
+        }
+      }
+
+      return res.status(201).json({
+        mensaje: "Venta creada exitosamente",
+        idVenta: ventaGenerado.idVenta,
+      });
     });
   } catch (e) {
     console.error("Error al registrar la venta:", e.message);
