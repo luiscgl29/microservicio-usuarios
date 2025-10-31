@@ -11,7 +11,7 @@ const proveedoresRutas = Router();
 
 proveedoresRutas.route("/").post(crearProveedor).get(listarProveedor);
 proveedoresRutas
-  .route("/:idProveedor")
+  .route("/:id")
   .get(obtenerProveedor)
   .put(modificarProveedor)
   .delete(eliminarProveedor);

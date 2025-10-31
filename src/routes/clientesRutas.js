@@ -11,7 +11,7 @@ const clientesRutas = Router();
 
 clientesRutas.route("/").post(crearCliente).get(listarClientes);
 clientesRutas
-  .route("/:idCliente")
+  .route("/:id")
   .get(obtenerCliente)
   .put(modificarCliente)
   .delete(eliminarCliente);

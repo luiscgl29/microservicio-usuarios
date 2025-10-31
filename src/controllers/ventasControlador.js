@@ -11,13 +11,13 @@ export const crearVenta = async (req, res) => {
       const ventaGenerado = await tx.venta.create({
         data: {
           idUsuario,
-          codCliente: codCliente || null, // Si no hay cliente, se guarda null
+          codCliente: codCliente || null,
           fecha: new Date(),
           totalVenta: new Prisma.Decimal(totalVenta),
         },
       });
 
-      // Crear detalles de venta
+      // Crear detalles de venta - Activacion del trigger
       await tx.detalleventa.createMany({
         data: detallesventa.map((detalle) => ({
           ...detalle,
@@ -27,32 +27,17 @@ export const crearVenta = async (req, res) => {
         })),
       });
 
-      // Actualizar inventario
-      for (const detalle of detallesventa) {
-        if (detalle.idProducto) {
-          // Reducir stock del producto
-          await tx.producto.update({
-            where: { idProducto: detalle.idProducto },
-            data: {
-              cantidadDisponible: {
-                decrement: detalle.cantidad,
-              },
-            },
-          });
-        }
-
-        if (detalle.idLote) {
-          // Reducir cantidad del lote
-          await tx.lote.update({
-            where: { idLote: detalle.idLote },
-            data: {
-              cantidadTotal: {
-                decrement: detalle.cantidad,
-              },
-            },
-          });
-        }
-      }
+      //   if (detalle.idLote) {
+      //     await tx.lote.update({
+      //       where: { idLote: detalle.idLote },
+      //       data: {
+      //         cantidadTotal: {
+      //           decrement: detalle.cantidad,
+      //         },
+      //       },
+      //     });
+      //   }
+      // }
 
       return res.status(201).json({
         mensaje: "Venta creada exitosamente",

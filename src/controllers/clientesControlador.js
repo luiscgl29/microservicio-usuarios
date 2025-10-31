@@ -34,13 +34,13 @@ export const listarClientes = async (req, res) => {
 
 export const obtenerCliente = async (req, res) => {
   try {
-    const { idCliente } = req.params;
-    if (!idCliente) {
+    const { id } = req.params;
+    if (!id) {
       return res.status(400).json({ mensaje: "Se necesita el id del cliente" });
     }
     const datos = await prisma.cliente.findUnique({
       where: {
-        codCliente: Number(idCliente),
+        codCliente: Number(id),
       },
     });
     res.status(200).json({ datosCliente: datos });
@@ -51,33 +51,40 @@ export const obtenerCliente = async (req, res) => {
 
 export const modificarCliente = async (req, res) => {
   try {
-    const { idCliente } = req.params;
-    const { client } = req.body;
-    if (!idCliente || !client) {
-      return res
-        .status(400)
-        .json({ mensaje: "Se necesita el id o el nombre del cliente" });
+    const { id } = req.params;
+    const { nombre, direccion, telefono, saldo, nitCliente } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ mensaje: "Se necesita el id del cliente" });
     }
+
     const clienteEncontrado = await prisma.cliente.findUnique({
       where: {
-        idCliente: Number(idCliente),
+        codCliente: Number(id), // Cambiar a codCliente
       },
     });
+
     if (!clienteEncontrado) {
       return res.status(400).json({ mensaje: "El cliente no existe" });
     }
+
     const datos = await prisma.cliente.update({
       where: {
-        idCliente: Number(idCliente),
+        codCliente: Number(id), // Cambiar a codCliente
       },
       data: {
-        ...clienteEncontrado,
-        nombre: client,
+        nombre,
+        direccion,
+        telefono,
+        saldo: Number(saldo),
+        nitCliente,
       },
     });
-    res.status(200).json({ mensaje: "Exitoso" });
+
+    res.status(200).json({ mensaje: "Exitoso", cliente: datos });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ mensaje: "Error al actualizar cliente" });
   }
 };
 
